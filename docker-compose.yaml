@@ -1,0 +1,75 @@
+version: '3'
+services:
+  app-user:
+    build:
+      context: ./user-api/user
+      dockerfile: ./Dockerfile
+    container_name: app-user
+    depends_on:
+      # - redis
+      - db-cluster
+    networks:
+      - rede-microsservico
+
+  app-order:
+    build:
+      context: ./order-api/app-order
+      dockerfile: ./Dockerfile
+    container_name: app-order
+    depends_on:
+      # - redis
+      - db-cluster
+      - app-user
+    networks:
+      - rede-microsservico
+
+
+  # db-user:
+  #   build:
+  #     context: ./user-api/dbUser
+  #     dockerfile: ./Dockerfile
+  #   container_name: db-user
+  #   networks:
+  #     - rede-microsservico
+
+  # db-order:
+  #   build:
+  #     context: ./order-api/db-order
+  #     dockerfile: ./Dockerfile
+  #   container_name: db-order
+  #   networks:
+  #     - rede-microsservico
+
+  db-cluster:
+    build:
+      context: ./db-cluster
+      dockerfile: ./Dockerfile
+    container_name: db-cluster
+    networks:
+      - rede-microsservico
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: ngnix
+    ports:
+      - '8080:80'
+      - '8081:81'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - rede-microsservico
+
+  # redis:
+  #   image: redis:latest
+  #   command: redis-server
+  #   container_name: redis
+  #   networks:
+  #     - rede-microsservico
+
+
+networks:
+  rede-microsservico:
+    driver: bridge
+  
